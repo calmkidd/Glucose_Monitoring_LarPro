@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import Login from "./pages/Login";
 import PrivateRoute from "./auth/PrivateRoute";
+import ActivateAccount from "./auth/ActivateAccount";
 
 import NurseLayout from "./layouts/NurseLayout";
 import PatientLayout from "./layouts/PatientLayout";
@@ -14,6 +15,7 @@ import Education from "./pages/patient/Education";
 import Account from "./pages/patient/Account";
 
 import NurseDashboard from "./pages/nurse/NurseDashboard";
+import NurseAddPatient from "./pages/nurse/NurseAddPatient";
 import Patients from "./pages/nurse/Patients";
 import ActivityLog from "./pages/nurse/ActivityLog";
 import TriageReport from "./pages/nurse/TriageReport";
@@ -38,6 +40,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Navigate to="/login" />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/activate" element={<ActivateAccount />} />
 
       {/* NURSE ROUTES */}
       <Route
@@ -49,10 +52,12 @@ function AppRoutes() {
         }
       >
         <Route index element={<NurseDashboard />} />
+        <Route path="add-patient" element={<NurseAddPatient />} />
         <Route path="patients" element={<Patients />} />
         <Route path="activity" element={<ActivityLog />} />
         <Route path="triage-reports" element={<TriageReport />} />
         <Route path="profile" element={<NurseProfile />} />
+        
       </Route>
 
       {/* PATIENT ROUTES */}

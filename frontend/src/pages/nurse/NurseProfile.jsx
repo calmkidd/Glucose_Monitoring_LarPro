@@ -4,22 +4,38 @@ import "../../styles/nurse.css";
 
 export default function NurseProfile() {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadProfile = async () => {
-      const data = await getProfile();
-      setUser(data);
+      try {
+        setLoading(true);
+        const data = await getProfile();
+        // Memastikan data yang masuk sesuai dengan struktur user Laravel
+        setUser(data);
+      } catch (err) {
+        console.error("Gagal memuat profil:", err);
+      } finally {
+        setLoading(false);
+      }
     };
     loadProfile();
   }, []);
 
-  if (!user) return <div className="loading-state">Memuat Profil...</div>;
+  if (loading) return (
+    <div className="nurse-container">
+      <div className="pulse-loader">Mengambil data kredensial...</div>
+    </div>
+  );
+
+  // Jika gagal ambil data, tampilkan pesan error atau arahkan login ulang
+  if (!user) return <div className="nurse-container">Sesi berakhir. Silakan login kembali.</div>;
 
   return (
     <div className="nurse-profile-wrapper">
       <div className="premium-header">
-        <h1>Profil Petugas Medis</h1>
-        <p>Informasi kredensial dan akses sistem pemantauan real-time.</p>
+        <h1 style={{ color: '#1e293b' }}>Profil Petugas Medis</h1>
+        <p style={{ color: '#64748b' }}>Informasi kredensial dan akses sistem pemantauan real-time.</p>
       </div>
 
       <div className="profile-grid">
@@ -30,49 +46,59 @@ export default function NurseProfile() {
             <div className="status-indicator">Online</div>
           </div>
           <div className="identity-text">
-            <label>Nama Lengkap</label>
-            <h2>{user.display_name || "Ns. Siti (Internal Medicine)"}</h2>
-            <span className="badge-nurse">{user.role.toUpperCase()}</span>
+            <label style={{ color: '#64748b' }}>Nama Lengkap</label>
+            {/* Menggunakan user.name (standar Laravel) atau user.display_name */}
+            <h2 style={{ color: '#1e293b', fontWeight: '800' }}>
+               {user.name || user.display_name || "Petugas Medis"}
+            </h2>
+            <span className="badge-nurse">
+              {user.role ? user.role.toUpperCase() : "NURSE"}
+            </span>
           </div>
         </div>
 
         {/* KARTU DETAIL: DATA PEGAWAI */}
         <div className="profile-card info-details">
-          <h3>Detail Kepegawaian</h3>
+          <h3 style={{ color: '#1e293b', borderBottom: '2px solid #f1f5f9', paddingBottom: '10px' }}>
+            Detail Kepegawaian
+          </h3>
           <div className="detail-item">
             <label>Email Akses</label>
-            <p>{user.email}</p>
+            <p style={{ color: '#1e293b', fontWeight: '600' }}>{user.email}</p>
           </div>
           <div className="detail-item">
             <label>Nomor Induk Pegawai (NIP)</label>
-            <p>{user.id_karyawan || "NIP-2026-RSPG-001"}</p>
+            {/* Menggunakan user.nip sesuai database atau fallback */}
+            <p style={{ color: '#1e293b', fontWeight: '600' }}>
+              {user.nip || user?.id_karyawan || "PGM-001"}
+            </p>
           </div>
           <div className="detail-item">
             <label>Unit Departemen</label>
-            <p>Diabetes Center - RS Petrokimia Gresik</p>
+            <p style={{ color: '#1e293b' }}>Diabetes Center - RS Petrokimia Gresik</p>
           </div>
           <div className="detail-item">
             <label>Spesialisasi Akses</label>
-            <p>Internal Medicine Monitoring</p>
+            <p style={{ color: '#1e293b' }}>Internal Medicine Monitoring</p>
           </div>
         </div>
 
         {/* KARTU KEAMANAN & SISTEM */}
         <div className="profile-card security-box">
-          <h3>Keamanan & Sistem</h3>
+          <h3 style={{ color: '#1e293b' }}>Keamanan & Sistem</h3>
           <div className="security-status">
             <div className="status-item">
               <span className="icon">🔒</span>
               <div>
-                <strong>Enkripsi Sesi</strong>
+                <strong style={{ color: '#1e293b' }}>Enkripsi Sesi</strong>
                 <p>HS256 - Aktif</p>
               </div>
             </div>
             <div className="status-item">
               <span className="icon">🛡️</span>
               <div>
-                <strong>Izin Akses</strong>
-                <p>Level: Administrator Medis</p>
+                <strong style={{ color: '#1e293b' }}>Izin Akses</strong>
+                <p>Level: {user.role === 'nurse' ? 'Administrator Medis' : 'Petugas'}</p>
               </div>
             </div>
           </div>

@@ -1,117 +1,142 @@
 import { useEffect, useState } from "react";
-import { getPatients } from "../../api"; // Pastikan fungsi ini ada di api.js
+import { getPatients } from "../../api";
 import "../../styles/nurse.css";
 
 export default function NurseDashboard() {
   const [patients, setPatients] = useState([]);
   const [stats, setStats] = useState({ total: 0, critical: 0, warning: 0 });
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Di dalam NurseDashboard.jsx
-    async function loadData() {
-      try {
-        const data = await getPatients();
-        if (data && Array.isArray(data)) {
-          setPatients(data);
-          // Kalkulasi statistik dari data nyata
-          const critical = data.filter(p => p.status === "Bahaya").length;
-          const warning = data.filter(p => p.status === "Waspada").length;
-          setStats({ total: data.length, critical, warning });
-        } else {
-          // Fallback ke data dummy jika API belum siap agar tampilan tetap "mahal"
-          console.warn("Menggunakan data dummy karena API belum merespons.");
-          const dummy = [
-            { id: 1, name: "Budi Santoso", rm: "RSPG-001", glucose: 250, status: "Bahaya", last_update: "10 Menit lalu", trend: "up" },
-            { id: 2, name: "Siti Aminah", rm: "RSPG-042", glucose: 110, status: "Stabil", last_update: "1 Jam lalu", trend: "down" }
-          ];
-          setPatients(dummy);
-          setStats({ total: 2, critical: 1, warning: 0 });
-        }
-      } catch (err) {
-        console.error("Gagal mengambil data pasien:", err);
+  async function loadData() {
+    try {
+      const data = await getPatients();
+      if (data && data.patients) {
+        setPatients(data.patients);
+        setStats({ 
+          total: data.total || 0, 
+          critical: data.critical || 0, 
+          warning: data.warning || 0 
+        });
+        setError(null);
       }
+    } catch (err) {
+      console.error("Gagal sinkronisasi data:", err);
+      setError("Server tidak merespon. Pastikan Backend API menyala.");
+    } finally {
+      setLoading(false);
     }
+  }
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { 
+    loadData(); 
+    const interval = setInterval(loadData, 5000); 
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) return (
+    <div className="nurse-container">
+      <div className="pulse-loader">Menginisialisasi Command Center...</div>
+    </div>
+  );
 
   return (
     <div className="nurse-container">
+      {/* HEADER DENGAN LIVE INDICATOR */}
       <header className="nurse-header">
         <div className="header-title">
-          <h1>Clinical Command Center</h1>
-          <p>Pemantauan Real-time Pasien Diabetes RS Petrokimia Gresik</p>
+          <h1 style={{ color: '#1e293b', fontWeight: '800', letterSpacing: '-0.5px' }}>
+            Clinical Command Center
+          </h1>
+          <p style={{ color: '#64748b' }}>Pemantauan Pasien Real-time • RS Petrokimia Gresik</p>
         </div>
         <div className="live-indicator">
           <span className="dot"></span> LIVE MONITORING
         </div>
       </header>
 
-      {/* STATS OVERVIEW */}
+      {error && (
+        <div className="error-banner">
+          ⚠️ {error}
+        </div>
+      )}
+
+      {/* STATS CARDS */}
       <div className="stats-grid">
         <div className="stat-card">
           <label>Total Pasien</label>
           <div className="stat-val">{stats.total}</div>
         </div>
         <div className="stat-card critical">
-          <label>Kritis / Bahaya</label>
+          <label>Kondisi Bahaya</label>
           <div className="stat-val">{stats.critical}</div>
+          <div className="stat-desc">Perlu Tindakan Segera</div>
         </div>
         <div className="stat-card warning">
-          <label>Perlu Observasi</label>
+          <label>Kondisi Waspada</label>
           <div className="stat-val">{stats.warning}</div>
+          <div className="stat-desc">Monitor Lebih Sering</div>
         </div>
       </div>
 
-      {/* PATIENT MONITORING TABLE */}
+      {/* MONITORING TABLE */}
       <div className="monitor-section">
-        <div className="section-header">
-          <h3>Daftar Pengawasan Pasien</h3>
-          <input type="text" placeholder="Cari Nama atau No. RM..." className="search-nurse" />
-        </div>
-
-        <div className="enterprise-table-wrapper">
-          <table className="nurse-table">
-            <thead>
-              <tr>
-                <th>Pasien</th>
-                <th>Gula Darah Terakhir</th>
-                <th>Status Triage</th>
-                <th>Update Terakhir</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {patients.map((p) => (
-                <tr key={p.id} className={`row-status-${p.status.toLowerCase()}`}>
-                  <td>
-                    <div className="patient-info-cell">
-                      <strong>{p.name}</strong>
-                      <span>{p.rm}</span>
+        <table className="nurse-table">
+          <thead>
+            <tr>
+              <th>INFORMASI PASIEN</th>
+              <th>KADAR GULA DARAH</th>
+              <th>STATUS TRIAGE</th>
+              <th>UPDATE TERAKHIR</th>
+            </tr>
+          </thead>
+          <tbody>
+            {patients.length > 0 ? patients.map((p) => (
+              <tr key={p.id} className={p.severity}>
+                <td className="patient-cell">
+                    {/* BAGIAN YANG DIRAPIKAN: Nama & RM */}
+                    <div className="name-wrapper">
+                      <div className="patient-main-info">
+                        <strong className="patient-name-text">{p.name}</strong>
+                        <span className="rm-separator">/</span>
+                        <span className="rm-badge-elegant">
+                          ID: {p.rm || 'N/A'}
+                        </span>
+                      </div>
+                      <small className="patient-sub-status">
+                        Status: {p.status || 'Aktif'}
+                      </small>
                     </div>
-                  </td>
-                  <td>
-                    <div className="glucose-cell">
-                      <span className="val">{p.glucose} mg/dL</span>
-                      <span className={`trend-icon ${p.trend}`}>
-                        {p.trend === "up" ? "↑" : p.trend === "down" ? "↓" : "→"}
+                </td>
+                <td className="glucose-td">
+                  <div className="glucose-flex-container">
+                      <span className="glucose-value-text">
+                          {p.latest_glucose || '--'}
+                      </span> 
+                      <span className="unit-text">mg/dL</span>
+                  </div>
+              </td>
+                <td>
+                    <div className="badge-wrapper">
+                      <span className={`triage-badge ${p.severity || 'stable'}`}>
+                          {p.severity === 'critical' ? 'BAHAYA' : 
+                           p.severity === 'warning' ? 'WASPADA' : 'STABIL'}
                       </span>
                     </div>
-                  </td>
-                  <td>
-                    <span className={`triage-badge ${p.status.toLowerCase()}`}>
-                      {p.status}
-                    </span>
-                  </td>
-                  <td>{p.last_update}</td>
-                  <td>
-                    <button className="btn-detail" onClick={() => window.location.href=`/nurse/patient/${p.id}`}>
-                      Lihat Analisis
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                </td>
+                <td className="time-cell">
+                    <span className="time-text">{p.last_visit}</span>
+                </td>
+              </tr>
+            )) : (
+              <tr>
+                <td colSpan="4" className="empty-state">
+                  Menunggu data pasien dari database...
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

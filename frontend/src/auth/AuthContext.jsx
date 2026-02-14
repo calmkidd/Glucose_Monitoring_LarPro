@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext(null);
-const API_URL = "http://127.0.0.1:5000";
+const API_URL = "http://127.0.0.1:8000/api";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -11,11 +11,10 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
-    const role = localStorage.getItem("role");
-    const patient_id = localStorage.getItem("patient_id");
+    const savedUser = localStorage.getItem("user");
 
-    if (token && role) {
-      setUser({ role, patient_id });
+    if (token && savedUser) {
+      setUser(JSON.parse(savedUser));
     }
     setLoading(false);
   }, []);
@@ -29,16 +28,28 @@ export function AuthProvider({ children }) {
       });
 
       const data = await res.json();
+      
+      // PERBAIKAN: Cek data.user (karena Backend mengirim {access_token, user: {...}})
+      if (!res.ok || !data.access_token || !data.user) return false;
 
-      if (!res.ok || !data.access_token) return false;
-
+      // 1. Simpan Token
       localStorage.setItem("access_token", data.access_token);
-      localStorage.setItem("role", data.role);
-      if (data.patient_id) localStorage.setItem("patient_id", data.patient_id);
+      
+      // 2. Simpan Objek User Utuh (Berisi role, patient_id, dll)
+      localStorage.setItem("user", JSON.stringify(data.user));
+      
+      // 3. Simpan key individu untuk kemudahan api.js (Optional tapi membantu)
+      localStorage.setItem("role", data.user.role);
+      if (data.user.patient_id) {
+        localStorage.setItem("patient_id", data.user.patient_id.toString());
+      }
 
-      setUser({ role: data.role, patient_id: data.patient_id });
+      // 4. Update State
+      setUser(data.user);
+      
       return data; 
     } catch (err) {
+      console.error("Login Error:", err);
       return false;
     }
   }
@@ -51,7 +62,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={{ user, login, logout, loading }}>
-      {children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 }

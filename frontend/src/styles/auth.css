@@ -1,0 +1,137 @@
+/* src/styles/auth.css */
+:root {
+    --rspg-green: #008744;        /* Hijau Utama RSPG */
+    --rspg-green-dark: #006b35;   /* Hijau Tua untuk Hover */
+    --rspg-yellow: #fdb913;       /* Kuning Emas Identitas */
+    --rspg-text-dark: #2d3748;
+    --rspg-bg-light: #f0f7f4;     /* Background bernuansa hijau sangat muda */
+}
+
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    /* Gradient yang lebih halus dengan nuansa hijau RSPG */
+    background: linear-gradient(135deg, var(--rspg-bg-light) 0%, #e2e8f0 100%);
+    padding: 20px;
+}
+
+.auth-card-premium {
+    background: white;
+    padding: 40px;
+    border-radius: 20px; /* Lebih membulat agar modern */
+    /* Shadow hijau tipis untuk kesan "Heal" */
+    box-shadow: 0 15px 35px rgba(0, 135, 68, 0.1); 
+    width: 100%;
+    max-width: 450px;
+    border-top: 5px solid var(--rspg-yellow); /* Aksen Kuning Emas di bagian atas */
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-header h2 {
+    color: var(--rspg-green); /* Header menjadi Hijau RSPG */
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+.auth-header p {
+    color: #718096;
+    font-size: 0.9rem;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--rspg-text-dark);
+    font-size: 0.85rem;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    background-color: #fcfdfc;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: var(--rspg-green);
+    /* Glow focus warna hijau */
+    box-shadow: 0 0 0 3px rgba(0, 135, 68, 0.15);
+}
+
+.btn-auth-primary {
+    width: 100%;
+    padding: 14px;
+    background-color: var(--rspg-green); /* Tombol Hijau Utama */
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    box-shadow: 0 4px 12px rgba(0, 135, 68, 0.2);
+}
+
+.btn-auth-primary:hover {
+    background-color: var(--rspg-green-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(0, 135, 68, 0.3);
+}
+
+.btn-auth-primary:active {
+    transform: translateY(0);
+}
+
+.auth-alert {
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.alert-success { 
+    background: #dcfce7; 
+    color: #166534; 
+    border: 1px solid #bbf7d0;
+}
+
+.alert-danger { 
+    background: #fee2e2; 
+    color: #991b1b; 
+    border: 1px solid #fecaca;
+}
+
+.auth-footer {
+    margin-top: 25px;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #718096;
+}
+
+.auth-footer a {
+    color: var(--rspg-green);
+    text-decoration: none;
+    font-weight: 700;
+    transition: color 0.2s;
+}
+
+.auth-footer a:hover {
+    color: var(--rspg-green-dark);
+    text-decoration: underline;
+}

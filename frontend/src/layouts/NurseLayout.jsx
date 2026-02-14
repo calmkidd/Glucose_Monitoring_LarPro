@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import logo from "../assets/Logo_pgm.png"; // Pastikan path logo benar
+import logo from "../assets/Logo_pgm.png"; 
 import "../styles/nurse.css";
 
 export default function NurseLayout() {
@@ -7,6 +7,7 @@ export default function NurseLayout() {
 
   const menuItems = [
     { path: "/nurse", label: "Command Center", icon: "📊" },
+    { path: "/nurse/add-patient", label: "Registrasi Pasien", icon: "➕" }, // MENU BARU
     { path: "/nurse/patients", label: "Daftar Pasien", icon: "👥" },
     { path: "/nurse/activity", label: "Log Aktivitas", icon: "📝" },
     { path: "/nurse/triage-reports", label: "Laporan Triage", icon: "📋" },
@@ -44,21 +45,21 @@ export default function NurseLayout() {
         </div>
       </aside>
 
-        <main className="nurse-content-area">
-          {/* Header content area yang diperbarui */}
-          <header className="content-top-bar">
-            <div className="top-bar-left">
-              <span className="system-subtitle">Sistem Informasi Pantau Gula Darah Sehat</span>
-            </div>
-            <div className="top-bar-right">
-              <span className="medics-info">Petugas Medis: <strong>Ns. Siti (Internal Medicine)</strong></span>
-            </div>
-          </header>
-          
-          <div className="content-padding">
-            <Outlet />
+      <main className="nurse-content-area">
+        {/* Header content area yang diperbarui */}
+        <header className="content-top-bar">
+          <div className="top-bar-left">
+            <span className="system-subtitle">Sistem Informasi Pantau Gula Darah Sehat</span>
           </div>
-        </main>
+          <div className="top-bar-right">
+            <span className="medics-info">Petugas Medis: <strong>Ns. Siti (Internal Medicine)</strong></span>
+          </div>
+        </header>
+        
+        <div className="content-padding">
+          <Outlet />
+        </div>
+      </main>
     </div>
   );
 }

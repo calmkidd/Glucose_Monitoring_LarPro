@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
-import { addMedication, getMedications } from "../../api";
+import { addMedication, getMedications, getProfile } from "../../api";
 import "../../styles/medications.css";
 
 // FUNGSI PERBAIKAN JAM (SELISIH 7 JAM)
 function formatDate(dateString) {
   if (!dateString) return "-";
   try {
-    // Mengubah spasi menjadi 'T' agar sesuai standar ISO
     const iso = dateString.includes(" ") ? dateString.replace(" ", "T") : dateString;
-    
-    // TAMBAHKAN "Z" agar dianggap UTC, lalu otomatis ditambah 7 jam oleh timeZone Jakarta
     const d = new Date(iso + "Z");
     
     if (isNaN(d.getTime())) return dateString;
@@ -20,7 +17,7 @@ function formatDate(dateString) {
       year: "numeric",
       hour: "2-digit", 
       minute: "2-digit",
-      timeZone: "Asia/Jakarta" // Menambah 7 jam secara otomatis
+      timeZone: "Asia/Jakarta" 
     }).replace(/\./g, ':');
   } catch (e) {
     return dateString;
@@ -32,14 +29,36 @@ export default function Medications() {
   const [dose, setDose] = useState("");
   const [schedule, setSchedule] = useState("Pagi"); 
   const [records, setRecords] = useState([]);
+  const [patientId, setPatientId] = useState(null);
 
-  async function loadData() {
+  // 1. Ambil ID Pasien saat komponen pertama kali dimuat
+  useEffect(() => {
+    async function init() {
+      try {
+        const user = await getProfile();
+        if (user && (user.patient_id || user.id)) {
+          const id = user.patient_id || user.id;
+          setPatientId(id);
+          loadData(id); // Langsung muat data setelah ID didapat
+        }
+      } catch (err) {
+        console.error("Gagal mengambil profil:", err);
+      }
+    }
+    init();
+  }, []);
+
+  // 2. Fungsi Load Data dengan parameter ID
+  async function loadData(id) {
+    const targetId = id || patientId;
+    if (!targetId) return;
+
     try {
-      const data = await getMedications();
+      const data = await getMedications(targetId);
       if (Array.isArray(data)) {
-        // Urutkan data terbaru di paling atas
+        // Urutkan data berdasarkan waktu terbaru (recorded_at dari DB)
         const sorted = [...data].sort((a, b) => 
-          (b.taken_at || b.created_at).localeCompare(a.taken_at || a.created_at)
+          (b.recorded_at || b.created_at).localeCompare(a.recorded_at || a.created_at)
         );
         setRecords(sorted);
       }
@@ -48,10 +67,21 @@ export default function Medications() {
     }
   }
 
+  // 3. Fungsi Submit dengan menyertakan patient_id
   async function handleSubmit(e) {
     e.preventDefault();
+    
+    // Ambil ID terbaru (bisa dari state atau dari localStorage)
+    const currentId = patientId || JSON.parse(localStorage.getItem("user"))?.patient_id;
+
+    if (!currentId) {
+      alert("Gagal mendapatkan ID Pasien. Silakan Refresh atau Login ulang.");
+      return;
+    }
+
     try {
       await addMedication({
+        patient_id: currentId, // Menggunakan ID yang valid
         medication_name: name,
         dosage: dose,
         time_of_day: schedule,
@@ -60,15 +90,13 @@ export default function Medications() {
       setName("");
       setDose("");
       setSchedule("Pagi");
-      await loadData();
+      await loadData(patientId); // Refresh daftar setelah simpan
+      alert("Data obat berhasil disimpan!");
     } catch (err) {
       console.error("Gagal simpan:", err);
+      alert("Gagal menyimpan data ke server.");
     }
   }
-
-  useEffect(() => {
-    loadData();
-  }, []);
 
   return (
     <div className="medication-container">
@@ -107,7 +135,7 @@ export default function Medications() {
               <option value="Malam">Malam</option>
             </select>
           </div>
-          <button className="btn-save-enterprise">Simpan</button>
+          <button type="submit" className="btn-save-enterprise">Simpan</button>
         </form>
       </div>
 
@@ -118,8 +146,8 @@ export default function Medications() {
           {records.map((r, i) => (
             <div key={i} className="medication-item-row">
               <div className="item-main">
-                <div className={`schedule-badge ${(r.time_of_day || r.schedule || "Pagi").toLowerCase()}`}>
-                  {r.time_of_day || r.schedule || "Pagi"}
+                <div className={`schedule-badge ${(r.time_of_day || "Pagi").toLowerCase()}`}>
+                  {r.time_of_day || "Pagi"}
                 </div>
                 <div className="item-info">
                   <strong>{r.medication_name}</strong>
@@ -128,7 +156,8 @@ export default function Medications() {
               </div>
               <div className="item-meta">
                 <span className="timestamp-label">Waktu Pencatatan</span>
-                <span className="timestamp-val">{formatDate(r.taken_at || r.created_at)}</span>
+                {/* Gunakan recorded_at sesuai kolom di database Laravel */}
+                <span className="timestamp-val">{formatDate(r.recorded_at || r.created_at)}</span>
               </div>
             </div>
           ))}

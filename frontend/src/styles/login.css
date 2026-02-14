@@ -1,212 +1,163 @@
-/* login.css - Enterprise Level Design */
-
 :root {
-  --primary-blue: #f8fafc;
-  --gradient-left: linear-gradient(135deg, #f8fafc 0%, #f8fafc 100%);
-  --bg-light: #f8fafc; /* Putih keabuan profesional */
-  --text-dark: #334155;
-  --text-light: #111111;
-  --accent-green: #94e3b1; /* Sesuai tombol di gambar */
-  --accent-green-hover: #7cd69d;
-  --border-color: #e2e8f0;
-  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --primary: #008744;
+  --dark: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+html { scroll-behavior: smooth; }
+
+.landing-wrapper { background: white; }
+
+/* CONTAINER - Mengunci Konten Agar Tidak Mepet */
+.container {
+  max-width: 1150px;
+  margin: 0 auto;
+  padding: 0 40px; /* Memberi ruang napas di kiri-kanan */
 }
 
-.login-page {
-  display: flex;
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
+/* NAVBAR */
+.main-nav {
+  background: white;
+  padding: 25px 0;
+  border-bottom: 1px solid #f1f5f9;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
-
-/* BAGIAN KIRI - ILUSTRASI */
-.login-left {
-  flex: 1.2; /* Sedikit lebih lebar untuk estetika */
-  background: var(--gradient-left);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  padding: 40px;
+.nav-flex { display: flex; justify-content: space-between; align-items: center; }
+.nav-logo { height: 50px; }
+.nav-menu { display: flex; gap: 45px; }
+.nav-menu span { 
+  cursor: pointer; font-weight: 600; font-size: 14px; 
+  color: var(--muted); transition: 0.3s; 
 }
+.nav-menu span:hover { color: var(--primary); }
 
-.login-logo {
-  position: absolute;
-  top: 30px;
-  left: 30px;
-  height: 60px; /* Sesuaikan ukuran logo */
-  width: auto;
-  object-fit: contain;
+/* HERO SECTION */
+.section-hero { padding: 80px 0; background: #fdfdfd; }
+.hero-flex { display: flex; align-items: flex-start; gap: 100px; } /* Jeda Antar Flexbox Diperlebar */
+
+.hero-info { flex: 1.1; }
+.pill-small { 
+  font-size: 11px; font-weight: 800; color: var(--primary); 
+  background: #e8f5e9; padding: 6px 14px; border-radius: 30px; 
+  text-transform: uppercase; letter-spacing: 0.5px;
 }
+.hero-info h1 { font-size: 2.8rem; line-height: 1.2; color: var(--dark); font-weight: 800; margin: 20px 0; }
+.text-primary { color: var(--primary); }
+.hero-desc { font-size: 1.05rem; color: var(--muted); line-height: 1.6; margin-bottom: 30px; }
 
-.login-left-content {
-  text-align: center;
-  color: var(--text-light);
-  max-width: 80%;
+.hero-actions { display: flex; gap: 15px; margin-bottom: 40px; }
+.btn-hero-primary { background: var(--dark); color: white; border: none; padding: 13px 25px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+.btn-hero-outline { background: white; color: var(--dark); border: 1.5px solid var(--border); padding: 13px 25px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+
+.hero-img-refined { width: 100%; max-width: 550px; filter: drop-shadow(0 20px 40px rgba(0,0,0,0.06)); }
+
+/* LOGIN CARD */
+.login-side { flex: 0.9; }
+.login-card-premium {
+  background: white; padding: 50px; border-radius: 28px; 
+  box-shadow: 0 30px 60px -12px rgba(0,0,0,0.08); border: 1px solid #f1f5f9;
 }
+.card-header { text-align: center; margin-bottom: 35px; }
+.card-header h2 { font-size: 24px; font-weight: 800; color: var(--dark); }
+.card-header p { font-size: 14px; color: var(--muted); margin-top: 6px; }
 
-.login-left-content h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 10px;
-  letter-spacing: -0.025em;
+.input-group { margin-bottom: 22px; }
+.input-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--dark); }
+.input-group input {
+  width: 100%; padding: 14px 18px; border-radius: 12px; border: 1.5px solid var(--border); transition: 0.3s;
 }
+.input-group input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(0, 135, 68, 0.08); outline: none; }
 
-.login-left-content p {
-  font-size: 1.2rem;
-  opacity: 0.9;
-  margin-bottom: 40px;
+.btn-main-login {
+  width: 100%; padding: 16px; background: var(--primary); color: white; 
+  border: none; border-radius: 12px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.3s;
 }
+.btn-main-login:hover { background: #006b35; transform: translateY(-2px); }
 
-.login-hero {
-  width: 100%;
-  max-width: 500px;
-  height: auto;
-  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15));
-  animation: float 6s ease-in-out infinite;
-}
+/* CONTENT SECTION */
+.section-content { padding: 100px 0; }
+.section-head-center { text-align: center; margin-bottom: 60px; }
+.grid-edu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 35px; }
+.edu-card { padding: 40px; border-radius: 24px; border: 1px solid #f1f5f9; transition: 0.3s; }
+.edu-card:hover { border-color: var(--primary); transform: translateY(-5px); }
 
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-  100% { transform: translateY(0px); }
-}
-
-/* BAGIAN KANAN - FORM LOGIN */
-.login-right {
-  flex: 0.8;
-  background-color: #d1e7d6;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px;
-}
-
-.login-card {
-  width: 100%;
-  max-width: 400px;
-  display: flex;
-  flex-direction: column;
-}
-
-.login-card h2 {
-  font-size: 1.8rem;
-  color: var(--text-dark);
-  margin-bottom: 30px;
-  text-align: center;
-  font-weight: 600;
-}
-
-.login-error {
-  background-color: #fee2e2;
-  color: #dc2626;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  font-size: 0.9rem;
-  text-align: center;
-  border: 1px solid #fecaca;
-}
-
-.login-card label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-dark);
-  margin-bottom: 8px;
-}
-
-.login-card input {
-  width: 100%;
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background-color: #f1f5f9; /* Biru muda sangat pucat seperti gambar */
-  font-size: 1rem;
-  transition: all 0.2s ease;
-}
-
-.login-card input:focus {
-  outline: none;
-  border-color: var(--primary-blue);
-  background-color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(30, 136, 229, 0.1);
-}
-
-.login-card button {
-  width: 100%;
-  padding: 14px;
-  background-color: var(--accent-green);
-  color: #144626; /* Teks hijau gelap untuk kontras */
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  margin-top: 10px;
-}
-
-.login-card button:hover {
-  background-color: var(--accent-green-hover);
+/* FOOTER */
+.footer-premium { background: #f8fafc; padding: 80px 0; border-top: 1px solid var(--border); }
+.footer-grid { display: flex; justify-content: space-between; gap: 60px; }
+.footer-col { flex: 1; }
+.emergency-side { text-align: right; }
+.phone-box-clean { 
+  display: inline-block; border: 2.5px solid var(--primary); color: var(--primary); 
+  padding: 12px 25px; border-radius: 14px; font-weight: 800; font-size: 1.5rem; margin-top: 15px; 
 }
 
 /* RESPONSIVE */
 @media (max-width: 1024px) {
-  .login-left {
-    display: none; /* Sembunyikan ilustrasi di layar kecil */
-  }
-  .login-right {
-    flex: 1;
-  }
+  .hero-flex { flex-direction: column; align-items: center; text-align: center; gap: 50px; }
+  .hero-info p { margin: 20px auto; }
+  .hero-actions { justify-content: center; }
+  .grid-edu, .footer-grid { grid-template-columns: 1fr; flex-direction: column; text-align: center; }
+  .emergency-side { text-align: center; }
 }
 
-.login-footer-links {
-  margin-top: 25px;
+/* ... (Gunakan CSS sebelumnya, tambahkan bagian di bawah ini) ... */
+
+/* SECTION PANDUAN STYLING */
+.section-guide-bg { 
+  padding: 100px 0; 
+  background: #f8fafc; /* Latar belakang abu pucat agar kontras dengan section lain */
+}
+
+.guide-steps {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 kolom agar lebih rapi */
+  gap: 30px;
+  margin-top: 50px;
+}
+
+.step-card {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
   display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  color: #64748b;
+  gap: 25px;
+  align-items: center;
+  border: 1px solid #f1f5f9;
+  transition: 0.3s;
 }
 
-.login-footer-links span {
-  cursor: pointer;
-  transition: color 0.2s;
-  font-weight: 500;
+.step-card:hover {
+  transform: translateX(10px);
+  border-color: var(--primary);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 
-.login-footer-links span:hover {
-  color: #008744; /* Hijau RSPG saat dihover */
-  text-decoration: underline;
+.step-number {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #e2e8f0; /* Warna angka yang soft/enterprise */
+  line-height: 1;
 }
 
-.back-link {
-  color: #008744 !important;
-  font-weight: 700 !important;
-}
-
-.btn-primary-login {
-  width: 100%;
-  padding: 14px;
-  background: #008744;
-  color: white;
-  border: none;
-  border-radius: 12px;
+.step-body h4 {
+  color: var(--dark);
+  font-size: 1.2rem;
+  margin-bottom: 8px;
   font-weight: 700;
-  cursor: pointer;
-  margin-top: 10px;
-  transition: background 0.3s ease;
 }
 
-.btn-primary-login:hover {
-  background: #006b35;
+.step-body p {
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .guide-steps {
+    grid-template-columns: 1fr;
+  }
 }

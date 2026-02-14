@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { addSymptom, getSymptoms } from "../../api";
+import { addSymptom, getSymptoms, getProfile } from "../../api";
 import "../../styles/symptoms.css";
 
 function formatDate(dateString) {
@@ -18,8 +18,8 @@ export default function Symptoms() {
   const [note, setNote] = useState("");
   const [records, setRecords] = useState([]);
   const [showToast, setShowToast] = useState(false);
+  const [patientId, setPatientId] = useState(null);
 
-  // Daftar gejala dipisahkan agar sinkron dengan Triage di main.py
   const symptomList = [
     { id: "lemas", label: "Badan Terasa Lemas", type: "hypo" },
     { id: "gemetar", label: "Tangan Gemetar", type: "hypo" },
@@ -33,19 +33,30 @@ export default function Symptoms() {
     { id: "kesemutan", label: "Kesemutan", type: "hyper" },
   ];
 
-  async function loadData() {
+  async function loadData(id) {
+    const targetId = id || patientId;
+    if (!targetId) return;
     try {
-      const data = await getSymptoms();
+      const data = await getSymptoms(targetId);
       if (Array.isArray(data)) {
-        const sorted = [...data].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        setRecords(sorted);
+        setRecords(data);
       }
-    } catch (err) {
-      console.error("Gagal memuat riwayat:", err);
-    }
+    } catch (err) { console.error(err); }
   }
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { 
+    async function init() {
+      try {
+        const user = await getProfile();
+        const id = user?.patient_id || user?.id;
+        if (id) {
+          setPatientId(id);
+          loadData(id);
+        }
+      } catch (err) { console.error("Auth error:", err); }
+    }
+    init();
+  }, []);
 
   const toggleSymptom = (id) => {
     setSelectedSymptoms(prev => 
@@ -55,19 +66,14 @@ export default function Symptoms() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!patientId) return alert("Sesi berakhir, silakan login kembali.");
     
-    // Pisahkan gejala menjadi hypo dan hyper sesuai permintaan main.py
-    const hypo = symptomList
-      .filter(s => selectedSymptoms.includes(s.id) && s.type === "hypo")
-      .map(s => s.label).join(",");
-    
-    const hyper = symptomList
-      .filter(s => selectedSymptoms.includes(s.id) && s.type === "hyper")
-      .map(s => s.label).join(",");
+    const hypo = symptomList.filter(s => selectedSymptoms.includes(s.id) && s.type === "hypo").map(s => s.label).join(",");
+    const hyper = symptomList.filter(s => selectedSymptoms.includes(s.id) && s.type === "hyper").map(s => s.label).join(",");
 
     try {
-      // DATA INI WAJIB SAMA DENGAN SymptomCreate DI main.py
       const result = await addSymptom({
+        patient_id: patientId,
         hypo_symptoms: hypo || "",
         hyper_symptoms: hyper || "",
         severity: selectedSymptoms.length > 3 ? "Berat" : "Sedang",
@@ -79,76 +85,49 @@ export default function Symptoms() {
         setShowToast(true);
         setSelectedSymptoms([]);
         setNote("");
-        setTimeout(async () => {
-          await loadData();
-          setShowToast(false);
-        }, 500);
+        setTimeout(() => { loadData(patientId); setShowToast(false); }, 1000);
       }
     } catch (err) {
-      console.error("Detail Error 422:", err);
-      alert("Gagal kirim. Pastikan semua field wajib terisi.");
+      console.error("Detail Error:", err);
+      alert("Gagal kirim laporan. Silakan cek koneksi server.");
     }
   };
 
   return (
     <div className="symptoms-page-container">
-      {showToast && <div className="toast-notification">Laporan berhasil terkirim ke sistem medik</div>}
-      
+      {showToast && <div className="toast-notification">Laporan berhasil terkirim</div>}
       <div className="premium-card">
         <div className="premium-header">
           <h2>Assessment Gejala Harian</h2>
-          <p>Laporan ini dianalisis otomatis oleh sistem Triage RS Petrokimia Gresik.</p>
+          <p>ID Pasien: {patientId || "Memuat..."}</p>
         </div>
-
         <form onSubmit={handleSubmit}>
           <div className="symptom-grid">
             {symptomList.map((s) => (
-              <div 
-                key={s.id} 
-                className={`symptom-box ${selectedSymptoms.includes(s.id) ? "active" : ""}`}
-                onClick={() => toggleSymptom(s.id)}
-              >
-                <div className="checkbox-custom">
-                  {selectedSymptoms.includes(s.id) && <span className="check-mark">✓</span>}
-                </div>
+              <div key={s.id} className={`symptom-box ${selectedSymptoms.includes(s.id) ? "active" : ""}`} onClick={() => toggleSymptom(s.id)}>
+                <div className="checkbox-custom">{selectedSymptoms.includes(s.id) && <span className="check-mark">✓</span>}</div>
                 <span>{s.label}</span>
               </div>
             ))}
           </div>
-
           <div className="input-group-premium">
             <label>Catatan Tambahan</label>
-            <textarea 
-              placeholder="Jelaskan kondisi Anda lebih mendalam jika perlu..."
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
+            <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Jelaskan kondisi Anda..." />
           </div>
-
-          <button type="submit" className="btn-submit-premium" disabled={selectedSymptoms.length === 0}>
-            Kirim Laporan Assessment
-          </button>
+          <button type="submit" className="btn-submit-premium" disabled={selectedSymptoms.length === 0}>Kirim Assessment</button>
         </form>
       </div>
-
       <div className="history-wrapper">
-        <div className="history-header">
-          <h3>Log Laporan Gejala</h3>
-          <span className="badge-count">{records.length} Laporan</span>
-        </div>
-        
+        <div className="history-header"><h3>Log Laporan Gejala</h3></div>
         <div className="symptom-history-list">
-          {records.length === 0 && <p className="empty-state">Belum ada riwayat laporan keluhan.</p>}
-          {records.map((r, i) => (
+          {records.length === 0 ? <p>Belum ada riwayat.</p> : records.map((r, i) => (
             <div key={i} className="history-item-card">
               <div className="history-main">
-                <div className={`risk-indicator ${(r.risk_label || "Stabil").toLowerCase()}`}>
-                  <span className="risk-text">{r.risk_label || "Stabil"}</span>
-                  <span className="condition-text">{r.conditions || "Terpantau"}</span>
+                <div className={`risk-indicator ${(r.severity || "stabil").toLowerCase()}`}>
+                    <span className="risk-text">{r.severity || "Sedang"}</span>
                 </div>
                 <div className="history-content">
                   <div className="symptoms-tags">
-                    {/* Menggabungkan hypo dan hyper untuk ditampilkan kembali */}
                     {[r.hypo_symptoms, r.hyper_symptoms].filter(Boolean).join(", ").split(",").map((tag, idx) => (
                       tag.trim() && <span key={idx} className="tag">{tag}</span>
                     ))}
@@ -156,9 +135,7 @@ export default function Symptoms() {
                   {r.note && <p className="history-note">"{r.note}"</p>}
                 </div>
               </div>
-              <div className="history-date">
-                <span className="date-val">{formatDate(r.created_at)}</span>
-              </div>
+              <div className="history-date"><span>{formatDate(r.recorded_at)}</span></div>
             </div>
           ))}
         </div>

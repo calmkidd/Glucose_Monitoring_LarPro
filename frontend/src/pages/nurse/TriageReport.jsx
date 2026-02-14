@@ -4,24 +4,42 @@ import "../../styles/nurse.css";
 export default function TriageReport() {
   const [reports, setReports] = useState([]);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
+        setLoading(true);
         const token = localStorage.getItem("access_token");
-        const headers = { "Authorization": `Bearer ${token}` };
+        const headers = { 
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/json"
+        };
 
-        // Ambil data petugas medis untuk tanda tangan
-        const userRes = await fetch("http://127.0.0.1:8000/auth/me", { headers });
-        const userData = await userRes.json();
-        setUser(userData);
+        // 1. Ambil data User/Nurse yang sedang login (Email: nurse@rspg.com)
+        try {
+          const userRes = await fetch("http://127.0.0.1:8000/api/user", { headers });
+          if (userRes.ok) {
+            const userData = await userRes.json();
+            setUser(userData); 
+          } else {
+            console.error("Gagal mengambil profil nurse, status:", userRes.status);
+          }
+        } catch (e) {
+          console.warn("Koneksi ke profil nurse gagal.");
+        }
 
-        // Ambil data pasien triage
-        const reportRes = await fetch("http://127.0.0.1:8000/nurse/patients-summary", { headers });
+        // 2. Ambil data pasien triage
+        const reportRes = await fetch("http://127.0.0.1:8000/api/nurse/patients-summary", { headers });
         const reportData = await reportRes.json();
-        if (Array.isArray(reportData)) setReports(reportData);
+        
+        if (reportData && Array.isArray(reportData.patients)) {
+          setReports(reportData.patients);
+        }
       } catch (err) {
-        console.error("Gagal memuat data:", err);
+        console.error("Gagal memuat data laporan:", err);
+      } finally {
+        setLoading(false);
       }
     };
     loadData();
@@ -31,37 +49,44 @@ export default function TriageReport() {
     window.print();
   };
 
+  if (loading) return (
+    <div className="nurse-container">
+      <div className="pulse-loader">Menyusun Laporan Medis...</div>
+    </div>
+  );
+
   return (
     <div className="triage-report-page">
-      {/* TAMPILAN DASHBOARD - OTOMATIS HILANG SAAT PRINT */}
+      {/* HEADER DASHBOARD - HILANG SAAT PRINT */}
       <div className="section-header-premium no-print">
         <div className="header-info">
-          <h2>Laporan Triage Pasien</h2>
-          <p>Rekapitulasi status risiko pasien untuk dokumentasi medis.</p>
+          <h2 style={{ color: '#1e293b', fontWeight: '800' }}>Laporan Triage Pasien</h2>
+          <p style={{ color: '#64748b' }}>Rekapitulasi status risiko pasien untuk dokumentasi medis resmi.</p>
         </div>
         <button className="btn-print-medical" onClick={handlePrint}>
           <span className="icon">🖨️</span> Cetak Laporan PDF
         </button>
       </div>
 
+      {/* KARTU MONITORING - HILANG SAAT PRINT */}
       <div className="triage-cards-container no-print">
-        {reports.map((d, i) => (
-          <div key={i} className={`triage-report-card ${d.status?.toLowerCase()}`}>
+        {reports.length > 0 ? reports.map((d, i) => (
+          <div key={i} className={`triage-report-card ${d.severity?.toLowerCase() || 'stabil'}`}>
             <div className="report-main">
-              <h4>{d.name}</h4>
+              <h4 style={{ color: '#1e293b', fontWeight: '700' }}>{d.name}</h4>
               <p className="rm-sub">No. RM: {d.rm}</p>
-              <div className="glucose-info">
-                Gula Darah Terakhir: <strong>{d.glucose} mg/dL</strong>
+              <div className="glucose-info" style={{ color: '#1e293b' }}>
+                Gula Darah Terakhir: <strong>{d.latest_glucose} mg/dL</strong>
               </div>
             </div>
             <div className="status-badge-container">
-              <span className={`status-badge-premium ${d.status?.toLowerCase()}`}>
-                {d.status}
+              <span className={`status-badge-premium ${d.severity?.toLowerCase() || 'stabil'}`}>
+                {d.severity || 'STABIL'}
               </span>
-              <small>Update: {d.last_update}</small>
+              <small>Update: {d.last_visit}</small>
             </div>
           </div>
-        ))}
+        )) : <p>Tidak ada data pasien untuk ditampilkan.</p>}
       </div>
 
       {/* AREA DOKUMEN RESMI - HANYA MUNCUL SAAT PRINT */}
@@ -77,7 +102,7 @@ export default function TriageReport() {
           </div>
           <hr className="kop-divider-double" />
           <h2 className="document-title">LAPORAN PEMANTAUAN TRIAGE DIABETES</h2>
-          <p className="document-subtitle">Data Real-time Sistem Informasi Gula Darah</p>
+          <p className="document-subtitle">Dicetak otomatis melalui Sistem Monitoring Gula Darah</p>
         </div>
 
         <table className="medical-print-table">
@@ -95,11 +120,11 @@ export default function TriageReport() {
               <tr key={i}>
                 <td>{d.rm}</td>
                 <td>{d.name}</td>
-                <td style={{ textAlign: 'center' }}>{d.glucose} mg/dL</td>
-                <td className={`status-cell-${d.status?.toLowerCase()}`} style={{ textAlign: 'center' }}>
-                  {d.status}
+                <td style={{ textAlign: 'center' }}>{d.latest_glucose} mg/dL</td>
+                <td className={`status-cell-${d.severity?.toLowerCase() || 'stabil'}`} style={{ textAlign: 'center', fontWeight: 'bold' }}>
+                  {(d.severity || 'STABIL').toUpperCase()}
                 </td>
-                <td>{d.last_update}</td>
+                <td>{d.last_visit}</td>
               </tr>
             ))}
           </tbody>
@@ -113,9 +138,10 @@ export default function TriageReport() {
             <p className="job-title">Petugas Medis,</p>
             <div className="signature-gap"></div>
             <p className="officer-name-signed">
-              <strong>( {user?.display_name || 'Ns. Siti'} )</strong>
+              {/* NAMA AKAN BERUBAH SESUAI USER YANG LOGIN (nurse@rspg.com) */}
+              <strong>( {user?.name || user?.display_name || 'Iqbal Zuhdi V, S.Kep'} )</strong>
             </p>
-            <p className="nip-detail">NIP: {user?.id_karyawan || 'NIP-RSPG-2024'}</p>
+            <p className="nip-detail">NIP: {user?.id_karyawan || 'PGM-001'}</p>
           </div>
         </div>
       </div>

@@ -262,3 +262,41 @@
   width: 100%;
   border-radius: 12px;
 }
+
+/* Styling Badge Keparahan */
+.risk-indicator {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  display: inline-block;
+  color: #000 !important; /* Paksa teks jadi hitam */
+}
+
+/* Warna berdasarkan tingkat */
+.risk-indicator.berat, .risk-indicator.bahaya {
+  background-color: #ff4d4d; /* Merah */
+  border: 1px solid #cc0000;
+}
+
+.risk-indicator.sedang, .risk-indicator.waspada {
+  background-color: #ffcc00; /* Kuning */
+  border: 1px solid #e6b800;
+}
+
+.risk-indicator.ringan, .risk-indicator.stabil {
+  background-color: #2ecc71; /* Hijau */
+  border: 1px solid #27ae60;
+}
+
+/* Styling Tag Gejala agar lebih rapi */
+.tag {
+  background: #f0f2f5;
+  color: #333;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  margin-right: 5px;
+  border: 1px solid #ddd;
+}

@@ -1,0 +1,19 @@
+[90m= [39m[34;4mApp\Models\User[39;24m {#6121
+    [34mid[39m: [35m3[39m,
+    [34mname[39m: "[32mTn UjiCOba[39m",
+    [34memail[39m: "[32mpasien1@gmail.com[39m",
+    [34memail_verified_at[39m: [36mnull[39m,
+    #[33mpassword[39m: "[32m$2y$12$z.xrNk7rBdTsGdW4xktbm.LUG2nLe2aVKCk8RRmunBAaxOEFxtyba[39m",
+    [34mrole[39m: "[32mpatient[39m",
+    [34mpatient_id[39m: [36mnull[39m,
+    [34mnurse_id[39m: [36mnull[39m,
+    #[33mremember_token[39m: [36mnull[39m,
+    [34mcreated_at[39m: "[32m2026-02-14 09:03:07[39m",
+    [34mupdated_at[39m: "[32m2026-02-14 09:32:43[39m",
+    [34mno_rm[39m: "[32mRSPG-0010[39m",
+    [34mphone[39m: "[32m082222334455[39m",
+    [34mgender[39m: "[32mL[39m",
+    [34mbirth_date[39m: "[32m2000-02-15[39m",
+    [34mis_active[39m: [35m1[39m,
+  }
+
