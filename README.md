@@ -1,25 +1,65 @@
-# Sistem Informasi Pantau Gula Darah - RSPG
+# 🏥 RSPG Glucose Monitoring Prototype
 
-Sistem pemantauan diabetes real-time untuk **RS Petrokimia Gresik**, terintegrasi dengan **RSPG Medical AI** (Gemini 2.5 Flash).
+Prototype Sistem Monitoring Gula Darah Real-time untuk Rumah Sakit Paru Gunawan (RSPG). Aplikasi ini menghubungkan pasien dan perawat dalam satu ekosistem digital untuk pemantauan kadar glukosa darah secara mandiri.
 
-##  Fitur Utama
-- **Dashboard Pasien**: Visualisasi tren gula darah dan jadwal pengobatan.
-- **RSPG Medical AI**: Asisten cerdas untuk konsultasi kesehatan mandiri.
-- **Portal Perawat**: Monitoring triage dan kondisi pasien secara kolektif.
+---
 
-## Instalasi
+## 🚀 Fitur Utama
 
-### Backend (FastAPI)
-1. Masuk ke folder: \`cd Backend\`
-2. Install library: \`pip install -r requirements.txt\`
-3. Jalankan server: \`uvicorn main:app --reload --port 5000\`
+### 👨‍⚕️ Dashboard Monitoring Perawat (Clinical Command Center)
+- **Triage Otomatis**: Klasifikasi otomatis status pasien menjadi **Bahaya (Critical)**, **Waspada (Warning)**, dan **Stabil** berdasarkan input terbaru.
+- **Auto-Sync**: Data tersinkronisasi otomatis setiap 5 detik tanpa perlu refresh halaman.
+- **Manajemen Pasien**: Pendaftaran pasien baru dan pemberian Nomor Rekam Medis (RM).
+- **UI Premium**: Tampilan tabel yang bersih dengan indikator warna status kesehatan.
 
-### Frontend (React + Vite)
-1. Masuk ke folder: \`cd frontend\`
-2. Install dependencies: \`npm install\`
-3. Jalankan aplikasi: \`npm run dev\`
+### 👤 Dashboard Pasien (Self-Monitoring)
+- **Log Gula Darah**: Input kadar gula darah mandiri dengan pencatatan waktu otomatis.
+- **Ringkasan Kesehatan**: Skor kesehatan dinamis dan rekomendasi tindakan berdasarkan kadar gula terbaru.
+- **Log Obat & Gejala**: Pencatatan konsumsi obat dan gejala harian untuk riwayat medis yang lengkap.
 
-##  Tech Stack
-- **Frontend**: React.js, Vite
-- **Backend**: FastAPI, SQLite
-- **AI Model**: Google Gemini 2.5 Flash (Update 2026)"
+---
+
+## 🛠️ Stack Teknologi
+
+- **Backend**: [Laravel 11](https://laravel.com) (PHP 8.2+) dengan Laravel Sanctum untuk Autentikasi API.
+- **Frontend**: [React.js](https://reactjs.org) dengan Vite & Tailwind CSS.
+- **Database**: MySQL / MariaDB.
+- **State Management**: React Hooks (useEffect, useState).
+- **GEMINI AI**: Gemini 2.5 Flash Gunakan API yang didapat dari `http://aistudio.google.com/`
+
+---
+
+## 📦 Cara Instalasi
+
+### 1. Persiapan Backend (Laravel)
+```bash
+# Masuk ke folder backend
+cd backend
+
+# Install dependencies
+composer install
+
+# Copy environment file
+cp .env.example .env
+
+# Generate app key
+php artisan key:generate
+
+# Masuk ke folder frontend
+cd frontend
+
+# Install dependencies
+npm install
+
+# Jalankan development server
+npm run dev
+```
+--------
+Sistem ini mengimplementasikan keamanan tingkat API menggunakan:
+- Sanctum Authentication: Setiap request dilindungi oleh Token Bearer.
+- Auth Guarding: Pasien hanya dapat melihat dan menginput data miliknya sendiri melalui identifikasi auth()->id() di sisi server, mencegah kebocoran data antar pengguna.
+Dikembangkan dengan untuk kemajuan sistem monitoring kesehatan digital.
+
+------------------------
+Maintained by: @calmkidd
+------------------------
